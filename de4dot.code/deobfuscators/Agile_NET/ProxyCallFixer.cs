@@ -18,6 +18,7 @@
 */
 
 using System;
+using de4dot.blocks;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 
@@ -40,6 +41,17 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 					if (method.FullName == methodName) {
 						SetDelegateCreatorMethod(method);
 						return;
+					}
+					// Sometimes, the method name is different.
+					if (method.IsStatic && !method.IsStaticConstructor && DotNetUtils.IsMethod(method, "System.Void", "(System.Int32)")) {
+						var instrs = DotNetUtils.GetInstructions(method.Body.Instructions, 0, OpCodes.Ldsflda,
+							OpCodes.Ldc_I4, OpCodes.Ldarg_0, OpCodes.Add, OpCodes.Call, OpCodes.Call);
+						if (instrs != null && instrs[1].GetLdcI4Value() == 0x2000001
+						                   // This is important to differentiate from SmartAssembly
+						                   && DotNetUtils.CallsMethod(method, "System.Byte[] System.Convert::FromBase64String(System.String)")) {
+							SetDelegateCreatorMethod(method);
+							return;
+						}
 					}
 				}
 			}
