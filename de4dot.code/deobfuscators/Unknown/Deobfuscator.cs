@@ -40,7 +40,7 @@ namespace de4dot.code.deobfuscators.Unknown {
 			});
 	}
 
-	class Deobfuscator : DeobfuscatorBase {
+	public class Deobfuscator : DeobfuscatorBase {
 		string obfuscatorName;
 
 		internal class Options : OptionsBase {
